@@ -1,0 +1,1078 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Caregiver — Care made easier</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --green: #245c4b;
+  --deep: #183f34;
+  --mint: #e7f0e8;
+  --bg: #f5f7f3;
+  --ink: #24372e;
+  --muted: #6b7b71;
+  --line: #e1e8e0;
+  --white: #ffffff;
+  --gold: #d7a84b;
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom Utilities & Animations */
+.glass-header {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.custom-shadow {
+  box-shadow: 0 10px 30px -5px rgba(24, 63, 52, 0.05);
+}
+
+.hover-card {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.hover-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 32px -8px rgba(24, 63, 52, 0.1);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #c5d4c8;
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--green);
+}
+
+.page {
+  display: none;
+}
+.page.active {
+  display: block;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.chatbox {
+  max-height: 340px;
+  min-height: 260px;
+  overflow-y: auto;
+}
+
+.bubble {
+  max-width: 85%;
+  border-radius: 16px;
+  padding: 12px 16px;
+  animation: bubblePop 0.2s ease-out;
+}
+
+@keyframes bubblePop {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.modalback {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 37, 29, 0.6);
+  backdrop-filter: blur(4px);
+  display: none;
+  place-items: center;
+  padding: 16px;
+  z-index: 50;
+  animation: fadeIn 0.2s ease-out;
+}
+.modalback.open {
+  display: grid;
+}
+
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 60;
+}
+.toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+</style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+<div class="shell max-w-6xl mx-auto px-4 py-6 w-full flex-grow">
+  
+  <!-- Header -->
+  <header class="top glass-header border border-[#e1e8e0] p-4 rounded-2xl flex items-center justify-between gap-4 sticky top-4 z-30 custom-shadow mb-6">
+    <div class="flex items-center gap-3">
+      <div class="logo h-11 w-11 rounded-xl bg-[#245c4b] text-white flex items-center justify-center text-xl font-bold shadow-md shadow-[#245c4b]/20">
+        ✚
+      </div>
+      <div>
+        <div class="brand text-xl font-extrabold text-[#183f34] tracking-tight leading-none">Caregiver</div>
+        <div class="tag text-xs text-[#6b7b71] font-medium mt-1" data-i="tag">Care starts here</div>
+      </div>
+    </div>
+    
+    <div class="flex items-center gap-2">
+      <select class="language border border-[#e1e8e0] bg-white text-[#24372e] text-sm font-semibold rounded-xl px-3 py-2 outline-none cursor-pointer focus:border-[#245c4b] transition-all shadow-sm" id="lang" aria-label="Language">
+        <option value="en">🇬🇧 EN</option>
+        <option value="ru">🇷🇺 RU</option>
+        <option value="uz">🇺🇿 UZ</option>
+      </select>
+    </div>
+  </header>
+
+  <!-- Navigation -->
+  <nav class="nav flex gap-2 mb-8 overflow-x-auto pb-2 scrollbar-none" id="nav">
+    <button class="active whitespace-nowrap border-0 bg-white text-[#526459] font-medium px-4 py-2.5 rounded-xl transition-all hover:bg-[#e7f0e8] hover:text-[#183f34] focus:outline-none [.active&]:bg-[#245c4b] [.active&]:text-white [.active&]:shadow-md [.active&]:shadow-[#245c4b]/20" data-page="home" data-i="navHome">⌂ Home</button>
+    <button class="whitespace-nowrap border-0 bg-white text-[#526459] font-medium px-4 py-2.5 rounded-xl transition-all hover:bg-[#e7f0e8] hover:text-[#183f34] focus:outline-none [.active&]:bg-[#245c4b] [.active&]:text-white [.active&]:shadow-md [.active&]:shadow-[#245c4b]/20" data-page="find" data-i="navFind">♙ Find a caregiver</button>
+    <button class="whitespace-nowrap border-0 bg-white text-[#526459] font-medium px-4 py-2.5 rounded-xl transition-all hover:bg-[#e7f0e8] hover:text-[#183f34] focus:outline-none [.active&]:bg-[#245c4b] [.active&]:text-white [.active&]:shadow-md [.active&]:shadow-[#245c4b]/20" data-page="learn" data-i="navLearn">▤ Knowledge hub</button>
+    <button class="whitespace-nowrap border-0 bg-white text-[#526459] font-medium px-4 py-2.5 rounded-xl transition-all hover:bg-[#e7f0e8] hover:text-[#183f34] focus:outline-none [.active&]:bg-[#245c4b] [.active&]:text-white [.active&]:shadow-md [.active&]:shadow-[#245c4b]/20" data-page="journal" data-i="navJournal">♡ Care journal</button>
+    <button class="whitespace-nowrap border-0 bg-white text-[#526459] font-medium px-4 py-2.5 rounded-xl transition-all hover:bg-[#e7f0e8] hover:text-[#183f34] focus:outline-none [.active&]:bg-[#245c4b] [.active&]:text-white [.active&]:shadow-md [.active&]:shadow-[#245c4b]/20" data-page="privacy" data-i="navPrivacy">◇ Privacy</button>
+  </nav>
+
+  <!-- Main Pages Container -->
+  <main>
+    <!-- HOME PAGE -->
+    <section class="page active" id="home">
+      <!-- Hero Section -->
+      <div class="hero grid md:grid-cols-12 gap-8 bg-[#e5eee5] p-6 sm:p-10 rounded-3xl items-center overflow-hidden border border-[#d6e2d6] custom-shadow">
+        <div class="md:col-span-7">
+          <div class="eyebrow text-[#245c4b] text-xs font-extrabold tracking-widest uppercase mb-2">CARE · CONNECT · SUPPORT</div>
+          <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#183f34] tracking-tight leading-tight my-3" data-i="heroTitle">You are not alone in caring for someone.</h1>
+          <p class="text-[#52675a] text-base sm:text-lg max-w-lg mb-6 leading-relaxed" data-i="heroText">Find support, explore care guidance, and organize daily care in one place.</p>
+          <div class="actions flex flex-wrap gap-3">
+            <button class="btn bg-[#245c4b] text-white hover:bg-[#183f34] font-bold px-6 py-3 rounded-xl transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0" data-go="find" data-i="findBtn">Find a caregiver →</button>
+            <button class="btn border border-[#cfdcd0] bg-white text-[#245c4b] hover:bg-[#f0f5f0] font-bold px-6 py-3 rounded-xl transition-all shadow-sm" data-go="learn" data-i="learnBtn">Explore care guides</button>
+          </div>
+        </div>
+        <div class="md:col-span-5 relative">
+          <img class="heroimg w-full h-64 sm:h-80 object-cover rounded-2xl shadow-md border-2 border-white/60" src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1000&q=85" alt="Professional nurse providing care" onerror="this.style.display='none'">
+        </div>
+      </div>
+
+      <!-- Categories -->
+      <div class="section mt-10">
+        <div class="sectionhead mb-5">
+          <div>
+            <h2 class="text-2xl font-bold text-[#183f34] tracking-tight" data-i="categories">Care categories</h2>
+            <p class="text-sm text-[#6b7b71] mt-1" data-i="catSub">Choose the type of support you need.</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          <button class="category group flex items-center gap-4 text-left w-full border border-[#e1e8e0] bg-white p-4 rounded-2xl text-[#24372e] hover-card" data-cat="dementia">
+            <span class="symbol text-2xl bg-[#e7f0e8] text-[#245c4b] w-12 h-12 flex items-center justify-center rounded-xl group-hover:bg-[#245c4b] group-hover:text-white transition-colors">🧠</span>
+            <span>
+              <b class="block text-base font-semibold" data-i="dementia">Dementia</b>
+              <small class="text-xs text-[#6b7b71]" data-i="dementiaSub">Memory care & companionship</small>
+            </span>
+          </button>
+          <button class="category group flex items-center gap-4 text-left w-full border border-[#e1e8e0] bg-white p-4 rounded-2xl text-[#24372e] hover-card" data-cat="stroke">
+            <span class="symbol text-2xl bg-[#e7f0e8] text-[#245c4b] w-12 h-12 flex items-center justify-center rounded-xl group-hover:bg-[#245c4b] group-hover:text-white transition-colors">♡</span>
+            <span>
+              <b class="block text-base font-semibold" data-i="stroke">Post-stroke</b>
+              <small class="text-xs text-[#6b7b71]" data-i="strokeSub">Daily living & recovery support</small>
+            </span>
+          </button>
+          <button class="category group flex items-center gap-4 text-left w-full border border-[#e1e8e0] bg-white p-4 rounded-2xl text-[#24372e] hover-card" data-cat="rehab">
+            <span class="symbol text-2xl bg-[#e7f0e8] text-[#245c4b] w-12 h-12 flex items-center justify-center rounded-xl group-hover:bg-[#245c4b] group-hover:text-white transition-colors">＋</span>
+            <span>
+              <b class="block text-base font-semibold" data-i="rehab">Rehabilitation</b>
+              <small class="text-xs text-[#6b7b71]" data-i="rehabSub">Support with care plans</small>
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Featured Caregivers -->
+      <div class="section mt-10">
+        <div class="sectionhead flex flex-col sm:flex-row sm:items-end justify-between gap-2 mb-5">
+          <div>
+            <h2 class="text-2xl font-bold text-[#183f34] tracking-tight" data-i="featured">Featured caregivers</h2>
+            <p class="text-sm text-[#6b7b71]" data-i="demo">Educational demo · fictional profiles</p>
+          </div>
+          <button class="btn text-xs font-bold text-[#245c4b] bg-white border border-[#cfdcd0] hover:bg-[#e7f0e8] px-4 py-2 rounded-xl transition-all self-start sm:self-auto" data-go="find" data-i="viewAll">View all →</button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="homePeople"></div>
+      </div>
+
+      <!-- Resources Preview -->
+      <div class="section mt-10">
+        <div class="sectionhead flex flex-col sm:flex-row sm:items-end justify-between gap-2 mb-5">
+          <div>
+            <h2 class="text-2xl font-bold text-[#183f34] tracking-tight" data-i="resources">Helpful resources</h2>
+            <p class="text-sm text-[#6b7b71]" data-i="resourcesSub">Practical tips for everyday care.</p>
+          </div>
+          <button class="btn text-xs font-bold text-[#245c4b] bg-white border border-[#cfdcd0] hover:bg-[#e7f0e8] px-4 py-2 rounded-xl transition-all self-start sm:self-auto" data-go="learn" data-i="readMore">Read guides →</button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5" id="homeArticles"></div>
+      </div>
+    </section>
+
+    <!-- FIND CAREGIVER PAGE -->
+    <section class="page" id="find">
+      <div class="sectionhead mb-6">
+        <div>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-[#183f34] tracking-tight" data-i="findTitle">Find your caregiver</h2>
+          <p class="text-sm text-[#6b7b71] mt-1" data-i="demo">Educational demo · fictional profiles</p>
+        </div>
+      </div>
+
+      <div class="flex flex-col md:flex-row gap-4 mb-6">
+        <div class="flex-grow">
+          <input id="search" class="w-full border border-[#dce5db] bg-white rounded-xl px-4 py-3 text-[#24372e] outline-none focus:border-[#245c4b] focus:ring-2 focus:ring-[#e7f0e8] transition-all shadow-sm" data-ph="searchPlaceholder" placeholder="Search by name or specialty…">
+        </div>
+      </div>
+
+      <div class="filterbar flex gap-2 flex-wrap mb-6" id="filters">
+        <button class="filter border border-[#e1e8e0] bg-white text-[#53665a] font-medium px-4 py-2 rounded-full transition-all text-sm [.active&]:bg-[#245c4b] [.active&]:text-white [.active&]:border-[#245c4b] active" data-cat="all" data-i="all">All</button>
+        <button class="filter border border-[#e1e8e0] bg-white text-[#53665a] font-medium px-4 py-2 rounded-full transition-all text-sm [.active&]:bg-[#245c4b] [.active&]:text-white [.active&]:border-[#245c4b]" data-cat="dementia" data-i="dementia">Dementia</button>
+        <button class="filter border border-[#e1e8e0] bg-white text-[#53665a] font-medium px-4 py-2 rounded-full transition-all text-sm [.active&]:bg-[#245c4b] [.active&]:text-white [.active&]:border-[#245c4b]" data-cat="stroke" data-i="stroke">Post-stroke</button>
+        <button class="filter border border-[#e1e8e0] bg-white text-[#53665a] font-medium px-4 py-2 rounded-full transition-all text-sm [.active&]:bg-[#245c4b] [.active&]:text-white [.active&]:border-[#245c4b]" data-cat="rehab" data-i="rehab">Rehabilitation</button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="people"></div>
+    </section>
+
+    <!-- KNOWLEDGE HUB PAGE -->
+    <section class="page" id="learn">
+      <div class="sectionhead mb-6">
+        <div>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-[#183f34] tracking-tight" data-i="knowledgeTitle">Knowledge for better care</h2>
+          <p class="text-sm text-[#6b7b71] mt-1" data-i="knowledgeSub">Short practical guides to support caregivers and families.</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-10" id="articles"></div>
+
+      <!-- AI Assistant Card -->
+      <div class="card bg-white border border-[#e1e8e0] rounded-3xl p-6 shadow-sm">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="privacy-icon w-11 h-11 rounded-xl bg-[#e7f0e8] text-[#245c4b] flex items-center justify-center text-xl font-bold">✧</div>
+          <div>
+            <h2 class="text-xl font-bold text-[#183f34]" data-i="aiTitle">Care AI assistant</h2>
+            <div class="text-xs text-[#6b7b71]" data-i="aiSub">An informational assistant for common care questions.</div>
+          </div>
+        </div>
+
+        <div class="chatbox bg-[#f8faf7] border border-[#e1e8e0] rounded-2xl p-4 flex flex-col gap-3 my-4" id="chat">
+          <div class="bubble bg-white border border-[#e1e8e0] shadow-sm">
+            <b class="block text-xs text-[#6b7b71] mb-1">Care AI</b>
+            <span data-i="welcome">Hello! I can help with general caregiving questions. What would you like to know?</span>
+          </div>
+        </div>
+
+        <form id="chatForm" class="space-y-3">
+          <textarea id="question" rows="2" class="w-full border border-[#dce5db] bg-white rounded-xl p-3 text-sm text-[#24372e] outline-none focus:border-[#245c4b] focus:ring-2 focus:ring-[#e7f0e8] transition-all resize-none" data-ph="askPlaceholder" placeholder="Ask a caregiving question…"></textarea>
+          <div class="actions flex gap-2">
+            <button class="btn bg-[#245c4b] hover:bg-[#183f34] text-white text-sm font-bold px-5 py-2.5 rounded-xl transition-all shadow-sm" type="submit" data-i="send">Send message</button>
+            <button class="btn border border-[#cfdcd0] bg-white text-[#245c4b] hover:bg-[#f0f5f0] text-sm font-semibold px-4 py-2.5 rounded-xl transition-all" type="button" id="clearChat" data-i="clear">Clear chat</button>
+          </div>
+        </form>
+        <p class="text-xs text-[#6b7b71] mt-3 italic" data-i="aiDisclaimer">AI demo uses prepared guidance, not a live medical AI. It does not diagnose or replace a healthcare professional.</p>
+      </div>
+    </section>
+
+    <!-- CARE JOURNAL PAGE -->
+    <section class="page" id="journal">
+      <div class="sectionhead flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
+        <div>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-[#183f34] tracking-tight" data-i="journalTitle">Care journal</h2>
+          <p class="text-sm text-[#6b7b71] mt-1" data-i="journalSub">Keep a simple record of daily observations.</p>
+        </div>
+        <span class="pill inline-flex items-center text-xs bg-[#e7f0e8] text-[#245c4b] px-3 py-1.5 rounded-full font-bold self-start sm:self-auto" data-i="localOnly">Saved in this browser</span>
+      </div>
+
+      <!-- Metrics Counter Grid -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8" id="metrics"></div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Add Entry Form -->
+        <div class="card lg:col-span-5 bg-white border border-[#e1e8e0] rounded-3xl p-6 shadow-sm">
+          <h2 class="text-xl font-bold text-[#183f34] mb-4" data-i="addEntry">Add an entry</h2>
+          <form id="entryForm" class="space-y-4">
+            <div>
+              <label class="block text-xs font-bold uppercase text-[#526459] mb-1.5" data-i="entryType" for="entryType">Entry type</label>
+              <select id="entryType" class="w-full border border-[#dce5db] bg-white rounded-xl p-3 text-sm text-[#24372e] outline-none focus:border-[#245c4b] transition-all">
+                <option value="temperature" data-i="temperature">Temperature</option>
+                <option value="pressure" data-i="pressure">Blood pressure</option>
+                <option value="water" data-i="water">Water intake</option>
+                <option value="medicine" data-i="medicine">Medication</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold uppercase text-[#526459] mb-1.5" data-i="entryValue" for="entryValue">Value</label>
+              <input id="entryValue" required maxlength="120" placeholder="e.g. 36.6 °C, 120/80, 250 ml" class="w-full border border-[#dce5db] bg-white rounded-xl p-3 text-sm text-[#24372e] outline-none focus:border-[#245c4b] transition-all">
+            </div>
+            <div>
+              <label class="block text-xs font-bold uppercase text-[#526459] mb-1.5" data-i="entryNote" for="entryNote">Note (optional)</label>
+              <textarea id="entryNote" rows="2" maxlength="300" placeholder="Time, symptoms, or additional context" class="w-full border border-[#dce5db] bg-white rounded-xl p-3 text-sm text-[#24372e] outline-none focus:border-[#245c4b] transition-all resize-none"></textarea>
+            </div>
+            <button class="btn w-full bg-[#245c4b] hover:bg-[#183f34] text-white font-bold py-3 rounded-xl transition-all shadow-md" type="submit" data-i="saveEntry">Save entry</button>
+          </form>
+          <p class="text-xs text-[#6b7b71] mt-4 italic" data-i="journalWarning">Demo only. Do not enter real patient information.</p>
+        </div>
+
+        <!-- History Container -->
+        <div class="card lg:col-span-7 bg-white border border-[#e1e8e0] rounded-3xl p-6 shadow-sm">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-bold text-[#183f34]" data-i="history">Recent entries</h2>
+            <button class="btn text-xs font-bold text-[#245c4b] border border-[#cfdcd0] hover:bg-[#e7f0e8] px-3 py-1.5 rounded-lg transition-all" id="clearEntries" data-i="clear">Clear</button>
+          </div>
+          <div id="entries" class="divide-y divide-[#e1e8e0] max-h-[460px] overflow-y-auto pr-1"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PRIVACY PAGE -->
+    <section class="page" id="privacy">
+      <div class="hero bg-[#e5eee5] p-8 sm:p-10 rounded-3xl border border-[#d6e2d6] custom-shadow mb-8">
+        <div class="eyebrow text-[#245c4b] text-xs font-extrabold tracking-widest uppercase mb-2" data-i="privacyEyebrow">PRIVACY BY DESIGN</div>
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-[#183f34] tracking-tight mb-3" data-i="privacyTitle">Your data deserves protection.</h1>
+        <p class="text-[#52675a] text-lg max-w-xl leading-relaxed" data-i="privacyIntro">Privacy is part of the product, not an afterthought.</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-8" id="privacyCards"></div>
+
+      <div class="card bg-white border border-[#e1e8e0] rounded-3xl p-6 sm:p-8 shadow-sm">
+        <h2 class="text-xl font-bold text-[#183f34] mb-4" data-i="launchTitle">Before a real launch</h2>
+        <ul id="launchList" class="space-y-3 list-disc list-inside text-sm text-[#526459] mb-6"></ul>
+        <div class="note bg-[#f6f0df] text-[#75602f] p-4 rounded-xl text-xs sm:text-sm leading-relaxed" data-i="lawNote">This educational prototype is not certified as GDPR- or HIPAA-compliant. Actual obligations depend on jurisdiction, organization, and how data is processed.</div>
+      </div>
+    </section>
+  </main>
+
+</div>
+
+<!-- Footer -->
+<footer class="footer border-t border-[#e1e8e0] bg-white py-6 mt-12 text-center text-xs text-[#6b7b71]">
+  <div class="max-w-6xl mx-auto px-4">
+    <b class="font-bold text-[#183f34]">Caregiver</b> · <span data-i="footer">Educational prototype. Fictional profiles. Not medical advice.</span>
+  </div>
+</footer>
+
+<!-- Modal Backdrop -->
+<div class="modalback" id="modalback">
+  <div class="modal bg-white rounded-3xl p-6 sm:p-8 w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl border border-[#e1e8e0]">
+    <div class="modalhead flex justify-between items-center mb-4 pb-3 border-b border-[#e1e8e0]">
+      <h2 id="modalTitle" class="text-xl font-bold text-[#183f34]">Caregiver profile</h2>
+      <button class="close w-9 h-9 rounded-xl bg-[#eef2ed] text-[#526459] hover:bg-[#e1e8e0] transition-colors flex items-center justify-center font-bold text-lg" id="modalClose" aria-label="Close">×</button>
+    </div>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<!-- Notification Toast -->
+<div class="toast bg-[#183f34] text-white px-5 py-3 rounded-2xl shadow-xl text-sm font-semibold flex items-center gap-2" id="toast"></div>
+
+<script>
+const translations = {
+  en: {
+    tag: "Care starts here",
+    navHome: "⌂ Home",
+    navFind: "♙ Find a caregiver",
+    navLearn: "▤ Knowledge hub",
+    navJournal: "♡ Care journal",
+    navPrivacy: "◇ Privacy",
+    heroTitle: "You are not alone in caring for someone.",
+    heroText: "Find support, explore care guidance, and organize daily care in one place.",
+    findBtn: "Find a caregiver →",
+    learnBtn: "Explore care guides",
+    categories: "Care categories",
+    catSub: "Choose the type of support you need.",
+    dementia: "Dementia",
+    dementiaSub: "Memory care & companionship",
+    stroke: "Post-stroke",
+    strokeSub: "Daily living & recovery support",
+    rehab: "Rehabilitation",
+    rehabSub: "Support with care plans",
+    featured: "Featured caregivers",
+    demo: "Educational demo · fictional profiles",
+    viewAll: "View all →",
+    resources: "Helpful resources",
+    resourcesSub: "Practical tips for everyday care.",
+    readMore: "Read guides →",
+    findTitle: "Find your caregiver",
+    all: "All",
+    searchPlaceholder: "Search by name or specialty…",
+    profile: "View profile",
+    book: "Request a booking",
+    experience: "Experience",
+    years: "years",
+    perDay: "/ day",
+    reviews: "reviews",
+    knowledgeTitle: "Knowledge for better care",
+    knowledgeSub: "Short practical guides to support caregivers and families.",
+    readArticle: "Read article",
+    back: "← Back to guides",
+    aiTitle: "Care AI assistant",
+    aiSub: "An informational assistant for common care questions.",
+    welcome: "Hello! I can help with general caregiving questions. What would you like to know?",
+    askPlaceholder: "Ask about dementia, pressure, medicine, or daily care…",
+    send: "Send message",
+    clear: "Clear",
+    aiDisclaimer: "AI demo uses prepared guidance, not a live medical AI. It does not diagnose or replace a healthcare professional.",
+    journalTitle: "Care journal",
+    journalSub: "Keep a simple record of daily observations.",
+    localOnly: "Saved in this browser",
+    addEntry: "Add an entry",
+    entryType: "Entry type",
+    temperature: "Temperature",
+    pressure: "Blood pressure",
+    water: "Water intake",
+    medicine: "Medication",
+    entryValue: "Value",
+    entryNote: "Note (optional)",
+    saveEntry: "Save entry",
+    journalWarning: "Demo only. Do not enter real patient information.",
+    history: "Recent entries",
+    emptyEntries: "No entries yet. Add your first observation.",
+    saved: "Entry saved.",
+    deleted: "Entry deleted.",
+    cleared: "Cleared.",
+    privacyEyebrow: "PRIVACY BY DESIGN",
+    privacyTitle: "Your data deserves protection.",
+    privacyIntro: "Privacy is part of the product, not an afterthought.",
+    encrypt: "Encryption",
+    encryptDesc: "Production systems should use TLS in transit and encryption at rest, with secure key management.",
+    access: "Access control",
+    accessDesc: "Use authentication, role-based permissions, least-privilege access, and audit logs.",
+    consent: "Informed consent",
+    consentDesc: "Explain what data is collected, why it is needed, how long it is kept, and how users can withdraw consent or request deletion.",
+    standards: "GDPR & HIPAA",
+    standardsDesc: "GDPR may apply to processing of personal data under relevant EU conditions. HIPAA applies to certain covered entities and business associates in the US.",
+    launchTitle: "Before a real launch",
+    lawNote: "This educational prototype is not certified as GDPR- or HIPAA-compliant. Actual obligations depend on jurisdiction, organization, and how data is processed.",
+    footer: "Educational prototype. Fictional profiles. Not medical advice.",
+    bookTitle: "Booking request",
+    chooseDate: "Preferred date",
+    chooseTime: "Preferred time",
+    visitType: "Visit type",
+    dayVisit: "Day visit",
+    nightVisit: "Night visit",
+    consentText: "I understand this is a demo request and consent to using the details entered here for this demonstration.",
+    confirm: "Confirm demo request",
+    cancel: "Cancel",
+    bookingDone: "Demo request recorded locally. No caregiver has been contacted and no real booking was made.",
+    consentRequired: "Please confirm the demo consent to continue.",
+    timeRequired: "Please choose a date and time.",
+    about: "About",
+    specialty: "Specialty",
+    close: "Close",
+    aiFallback: "I can share general care information, but I cannot diagnose or provide a personal treatment plan. Follow the care plan from a qualified professional. If symptoms are sudden or severe, contact local emergency services.",
+    aiPressure: "Record the blood pressure, time, and how the person feels. If appropriate, repeat the measurement after resting and follow the device instructions. A single reading is not a diagnosis. If there are severe or sudden symptoms, seek urgent medical care.",
+    aiMedicine: "Follow the prescription and medicine leaflet. Do not change the dose, stop treatment, or double a missed dose without advice from a qualified clinician or pharmacist. Keep a medication list and note any concerns.",
+    aiStroke: "Sudden facial drooping, weakness of an arm or leg, trouble speaking, or sudden loss of balance may be an emergency. Contact local emergency services immediately; do not wait for an online answer.",
+    aiDementia: "Use calm, simple sentences and give the person time to respond. Maintain familiar routines, reduce unnecessary noise, and offer choices without arguing about memory errors. Seek professional advice if changes are sudden.",
+    aiBed: "Follow the individual care plan. Check skin regularly, keep it clean and dry, and follow professional guidance on repositioning and safe transfers. Report skin damage, fever, new pain, or a sudden change in condition to a healthcare professional.",
+    aiWater: "Offer drinks regularly if fluids are allowed under the person's care plan. Some conditions require fluid restrictions, so do not set a target without clinical guidance. Record intake and report concerns to the care team.",
+    aiGeneric: "For safer guidance, follow the person's individual care plan and ask their healthcare professional. I can offer general information, but this demo is not connected to a live AI service.",
+    careArticles: [
+      ["Dementia-friendly communication", "Use calm, short sentences, familiar routines, and respectful choices. Avoid arguing over memory errors; seek help if behavior changes suddenly."],
+      ["Caring for a bedbound person", "Follow the care plan, check skin, keep the person comfortable, and use safe transfer techniques with help when needed."],
+      ["Supporting stroke recovery", "Follow the prescribed rehabilitation plan. Sudden speech difficulty, facial drooping, or weakness requires emergency help."]
+    ],
+    privacyItems: [
+      ["Encryption", "Production systems should use TLS in transit and encryption at rest, with secure key management."],
+      ["Access control", "Use authentication, role-based permissions, least-privilege access, and audit logs."],
+      ["Informed consent", "Explain data collection, purpose, retention, and how users can withdraw consent or request deletion."],
+      ["GDPR & HIPAA", "GDPR may apply under relevant EU conditions. HIPAA covers certain US healthcare organizations and business associates."]
+    ],
+    launchItems: [
+      "Secure server-side storage and encrypted backups",
+      "Account authentication and role-based access controls",
+      "Consent, data export, correction, and deletion workflows",
+      "Security testing, incident response, and retention policy",
+      "Legal review of applicable privacy and healthcare requirements"
+    ]
+  },
+  ru: {
+    tag: "Забота начинается здесь",
+    navHome: "⌂ Главная",
+    navFind: "♙ Найти сиделку",
+    navLearn: "▤ База знаний",
+    navJournal: "♡ Дневник ухода",
+    navPrivacy: "◇ Безопасность",
+    heroTitle: "Вы не одни в заботе о близких.",
+    heroText: "Найдите помощника, изучите рекомендации и организуйте ежедневный уход в одном месте.",
+    findBtn: "Найти сиделку →",
+    learnBtn: "Изучить рекомендации",
+    categories: "Категории ухода",
+    catSub: "Выберите подходящий вид поддержки.",
+    dementia: "Деменция",
+    dementiaSub: "Поддержка памяти и общение",
+    stroke: "После инсульта",
+    strokeSub: "Повседневный уход и восстановление",
+    rehab: "Реабилитация",
+    rehabSub: "Помощь по плану восстановления",
+    featured: "Рекомендуемые сиделки",
+    demo: "Учебное демо · вымышленные профили",
+    viewAll: "Все профили →",
+    resources: "Полезные материалы",
+    resourcesSub: "Практические советы на каждый день.",
+    readMore: "Читать статьи →",
+    findTitle: "Подбор сиделки",
+    all: "Все",
+    searchPlaceholder: "Поиск по имени или специализации…",
+    profile: "Профиль",
+    book: "Запросить бронирование",
+    experience: "Опыт",
+    years: "лет",
+    perDay: "/ день",
+    reviews: "отзывов",
+    knowledgeTitle: "Знания для лучшего ухода",
+    knowledgeSub: "Короткие практические рекомендации для семей и сиделок.",
+    readArticle: "Читать статью",
+    back: "← Назад к статьям",
+    aiTitle: "AI-помощник по уходу",
+    aiSub: "Информационный помощник по частым вопросам ухода.",
+    welcome: "Здравствуйте! Я помогу с общими вопросами ухода. Что вас интересует?",
+    askPlaceholder: "Спросите о деменции, давлении, лекарствах или уходе…",
+    send: "Отправить",
+    clear: "Очистить",
+    aiDisclaimer: "Демо AI использует подготовленные рекомендации, а не подключённую медицинскую модель. Он не ставит диагнозы и не заменяет врача.",
+    journalTitle: "Дневник ухода",
+    journalSub: "Ведите простые записи о ежедневных показателях.",
+    localOnly: "Сохраняется в этом браузере",
+    addEntry: "Добавить запись",
+    entryType: "Тип записи",
+    temperature: "Температура",
+    pressure: "Давление",
+    water: "Питьевой режим",
+    medicine: "Лекарства",
+    entryValue: "Значение",
+    entryNote: "Комментарий (необязательно)",
+    saveEntry: "Сохранить запись",
+    journalWarning: "Только демо. Не вводите настоящие данные пациента.",
+    history: "Последние записи",
+    emptyEntries: "Записей пока нет. Добавьте первое наблюдение.",
+    saved: "Запись сохранена.",
+    deleted: "Запись удалена.",
+    cleared: "Очищено.",
+    privacyEyebrow: "БЕЗОПАСНОСТЬ С САМОГО НАЧАЛА",
+    privacyTitle: "Ваши данные заслуживают защиты.",
+    privacyIntro: "Конфиденциальность — часть продукта, а не дополнение.",
+    encrypt: "Шифрование",
+    encryptDesc: "В рабочей версии нужны TLS при передаче, шифрование при хранении и безопасное управление ключами.",
+    access: "Контроль доступа",
+    accessDesc: "Используйте авторизацию, ролевые права, минимально необходимые разрешения и журналы доступа.",
+    consent: "Информированное согласие",
+    consentDesc: "Объясняйте, какие данные собираются, зачем, как долго хранятся и как отозвать согласие или запросить удаление.",
+    standards: "GDPR и HIPAA",
+    standardsDesc: "GDPR может применяться при соответствующих условиях обработки данных в ЕС. HIPAA распространяется на определённые организации и партнёров здравоохранения в США.",
+    launchTitle: "Перед настоящим запуском",
+    lawNote: "Учебный прототип не сертифицирован по GDPR или HIPAA. Реальные требования зависят от страны, организации и способа обработки данных.",
+    footer: "Учебный прототип. Вымышленные профили. Не является медицинской рекомендацией.",
+    bookTitle: "Запрос на бронирование",
+    chooseDate: "Желаемая дата",
+    chooseTime: "Желаемое время",
+    visitType: "Тип визита",
+    dayVisit: "Дневной визит",
+    nightVisit: "Ночной визит",
+    consentText: "Я понимаю, что это демонстрационный запрос, и согласен/согласна использовать введённые сведения для этой демонстрации.",
+    confirm: "Подтвердить демо-запрос",
+    cancel: "Отмена",
+    bookingDone: "Демо-запрос сохранён локально. Сиделке не отправлялось уведомление; реального бронирования нет.",
+    consentRequired: "Подтвердите согласие для продолжения.",
+    timeRequired: "Выберите дату и время.",
+    about: "О специалисте",
+    specialty: "Специализация",
+    close: "Закрыть",
+    aiFallback: "Я могу поделиться общей информацией, но не могу ставить диагноз или составлять индивидуальный план лечения. Следуйте рекомендациям квалифицированного специалиста. При внезапных тяжёлых симптомах обратитесь в местную экстренную службу.",
+    aiPressure: "Запишите давление, время и самочувствие человека. Если это уместно, повторите измерение после отдыха по инструкции прибора. Одно измерение не является диагнозом. При тяжёлых или внезапных симптомах нужна срочная медицинская помощь.",
+    aiMedicine: "Следуйте назначению врача и инструкции к препарату. Не меняйте дозу, не прекращайте лечение и не удваивайте пропущенную дозу без консультации врача или фармацевта. Ведите список лекарств.",
+    aiStroke: "Внезапная асимметрия лица, слабость руки или ноги, нарушение речи или равновесия могут быть признаками неотложного состояния. Немедленно вызовите местную экстренную службу — не ждите ответа в интернете.",
+    aiDementia: "Говорите спокойно и короткими фразами, поддерживайте привычный распорядок и предлагайте понятный выбор. Не спорьте из-за ошибок в памяти. При резких изменениях поведения обратитесь за медицинской помощью.",
+    aiBed: "Следуйте индивидуальному плану ухода. Регулярно осматривайте кожу, поддерживайте её чистоту и сухость, соблюдайте рекомендации по смене положения и безопасным перемещениям. О повреждении кожи, температуре, новой боли или резком ухудшении сообщите медработнику.",
+    aiWater: "Предлагайте питьё регулярно, если это разрешено планом ухода. При некоторых заболеваниях объём жидкости ограничивают, поэтому не устанавливайте норму без рекомендации врача. Записывайте объём и сообщайте о проблемах команде ухода.",
+    aiGeneric: "Для безопасного ухода следуйте индивидуальному плану и советам медицинского специалиста. Я могу дать общую информацию, но это демо не подключено к живой AI-модели.",
+    careArticles: [
+      ["Как общаться с человеком с деменцией", "Говорите спокойно и коротко, поддерживайте привычный распорядок и уважайте выбор человека. Не спорьте из-за ошибок в памяти; при резких изменениях поведения обратитесь за помощью."],
+      ["Уход за лежачим человеком", "Следуйте плану ухода, осматривайте кожу, обеспечивайте комфорт и безопасно перемещайте человека с помощью при необходимости."],
+      ["Поддержка после инсульта", "Следуйте назначенному плану реабилитации. Внезапное нарушение речи, асимметрия лица или слабость требуют экстренной помощи."]
+    ],
+    privacyItems: [
+      ["Шифрование", "В рабочей версии нужны TLS при передаче, шифрование при хранении и безопасное управление ключами."],
+      ["Контроль доступа", "Авторизация, ролевые права, минимальные разрешения и журналы доступа."],
+      ["Информированное согласие", "Объясняйте сбор данных, цели, сроки хранения и способы отзыва согласия или удаления."],
+      ["GDPR и HIPAA", "GDPR может применяться в соответствующих условиях ЕС. HIPAA охватывает определённые медицинские организации и деловых партнёров в США."]
+    ],
+    launchItems: [
+      "Защищённое серверное хранение и шифрованные резервные копии",
+      "Авторизация и доступ по ролям",
+      "Согласие, экспорт, исправление и удаление данных",
+      "Тестирование безопасности и политика хранения",
+      "Юридическая проверка применимых требований"
+    ]
+  },
+  uz: {
+    tag: "G‘amxo‘rlik shu yerdan boshlanadi",
+    navHome: "⌂ Bosh sahifa",
+    navFind: "♙ Parvarishchi topish",
+    navLearn: "▤ Bilimlar bazasi",
+    navJournal: "♡ Parvarish kundaligi",
+    navPrivacy: "◇ Xavfsizlik",
+    heroTitle: "Yaqinlaringizga g‘amxo‘rlikda yolg‘iz emassiz.",
+    heroText: "Yordamchi toping, tavsiyalarni o‘rganing va kundalik parvarishni bir joyda tashkil qiling.",
+    findBtn: "Parvarishchi topish →",
+    learnBtn: "Tavsiyalarni ko‘rish",
+    categories: "Parvarish toifalari",
+    catSub: "Kerakli yordam turini tanlang.",
+    dementia: "Demensiya",
+    dementiaSub: "Xotira parvarishi va muloqot",
+    stroke: "Insultdan keyin",
+    strokeSub: "Kundalik yordam va tiklanish",
+    rehab: "Reabilitatsiya",
+    rehabSub: "Tiklanish rejasiga yordam",
+    featured: "Tavsiya etilgan parvarishchilar",
+    demo: "O‘quv demosi · uydirma profillar",
+    viewAll: "Barchasini ko‘rish →",
+    resources: "Foydali manbalar",
+    resourcesSub: "Kundalik parvarish uchun amaliy maslahatlar.",
+    readMore: "Maqolalarni o‘qish →",
+    findTitle: "Parvarishchi tanlash",
+    all: "Barchasi",
+    searchPlaceholder: "Ism yoki mutaxassislik bo‘yicha qidirish…",
+    profile: "Profilni ko‘rish",
+    book: "Band qilish so‘rovi",
+    experience: "Tajriba",
+    years: "yil",
+    perDay: "/ kun",
+    reviews: "ta sharh",
+    knowledgeTitle: "Yaxshi parvarish uchun bilimlar",
+    knowledgeSub: "Oilalar va parvarishchilar uchun qisqa amaliy tavsiyalar.",
+    readArticle: "Maqolani o‘qish",
+    back: "← Maqolalarga qaytish",
+    aiTitle: "Care AI yordamchisi",
+    aiSub: "Parvarish bo‘yicha keng tarqalgan savollarga axborot yordami.",
+    welcome: "Salom! Parvarish bo‘yicha umumiy savollarga yordam beraman. Nimani bilmoqchisiz?",
+    askPlaceholder: "Demensiya, bosim, dori yoki parvarish haqida so‘rang…",
+    send: "Xabar yuborish",
+    clear: "Tozalash",
+    aiDisclaimer: "AI demo tayyorlangan tavsiyalardan foydalanadi, jonli tibbiy AI emas. U tashxis qo‘ymaydi va shifokor o‘rnini bosmaydi.",
+    journalTitle: "Parvarish kundaligi",
+    journalSub: "Kundalik kuzatuvlarni qayd eting.",
+    localOnly: "Ushbu brauzerda saqlanadi",
+    addEntry: "Yozuv qo‘shish",
+    entryType: "Yozuv turi",
+    temperature: "Harorat",
+    pressure: "Qon bosimi",
+    water: "Ichilgan suv",
+    medicine: "Dori",
+    entryValue: "Qiymat",
+    entryNote: "Izoh (ixtiyoriy)",
+    saveEntry: "Yozuvni saqlash",
+    journalWarning: "Faqat demo. Haqiqiy bemor ma’lumotlarini kiritmang.",
+    history: "So‘nggi yozuvlar",
+    emptyEntries: "Hozircha yozuv yo‘q. Birinchi kuzatuvni qo‘shing.",
+    saved: "Yozuv saqlandi.",
+    deleted: "Yozuv o‘chirildi.",
+    cleared: "Tozalandi.",
+    privacyEyebrow: "BOSHLANG‘ICHDAN MAXFIYLIK",
+    privacyTitle: "Ma’lumotlaringiz himoyaga loyiq.",
+    privacyIntro: "Maxfiylik mahsulotning ajralmas qismidir.",
+    encrypt: "Shifrlash",
+    encryptDesc: "Ishchi tizimlarda uzatishda TLS, saqlashda shifrlash va kalitlarni xavfsiz boshqarish kerak.",
+    access: "Kirish nazorati",
+    accessDesc: "Autentifikatsiya, rollar bo‘yicha ruxsatlar, minimal kirish huquqi va audit jurnallaridan foydalaning.",
+    consent: "Ongli rozilik",
+    consentDesc: "Qanday ma’lumotlar nima uchun yig‘ilishi, qancha saqlanishi va rozilikni qanday qaytarib olish yoki ma’lumotni o‘chirishni tushuntiring.",
+    standards: "GDPR va HIPAA",
+    standardsDesc: "GDPR tegishli YI sharoitlarida qo‘llanishi mumkin. HIPAA AQShdagi ayrim tibbiyot tashkilotlari va hamkorlariga tegishli.",
+    launchTitle: "Haqiqiy ishga tushirishdan oldin",
+    lawNote: "Ushbu o‘quv prototipi GDPR yoki HIPAA bo‘yicha sertifikatlanmagan. Talablar mamlakat, tashkilot va ma’lumotlarni qayta ishlash usuliga bog‘liq.",
+    footer: "O‘quv prototipi. Uydirma profillar. Tibbiy maslahat emas.",
+    bookTitle: "Band qilish so‘rovi",
+    chooseDate: "Kerakli sana",
+    chooseTime: "Kerakli vaqt",
+    visitType: "Tashrif turi",
+    dayVisit: "Kunduzgi tashrif",
+    nightVisit: "Tungi tashrif",
+    consentText: "Bu demo so‘rovi ekanini tushunaman va kiritilgan ma’lumotlardan ushbu namoyish uchun foydalanishga roziman.",
+    confirm: "Demo so‘rovini tasdiqlash",
+    cancel: "Bekor qilish",
+    bookingDone: "Demo so‘rovi brauzerda saqlandi. Parvarishchiga xabar yuborilmadi va haqiqiy band qilish bo‘lmadi.",
+    consentRequired: "Davom etish uchun rozilikni tasdiqlang.",
+    timeRequired: "Sana va vaqtni tanlang.",
+    about: "Mutaxassis haqida",
+    specialty: "Mutaxassislik",
+    close: "Yopish",
+    aiFallback: "Men umumiy ma’lumot bera olaman, ammo tashxis yoki shaxsiy davolash rejasini bera olmayman. Malakali mutaxassis tavsiyasiga amal qiling. To‘satdan og‘ir alomatlar yuz bersa, mahalliy tez yordamga murojaat qiling.",
+    aiPressure: "Qon bosimi, vaqt va insonning holatini yozib qo‘ying. Zarur bo‘lsa, qurilma yo‘riqnomasiga muvofiq dam olgandan keyin qayta o‘lchang. Bitta o‘lchov tashxis emas. Og‘ir yoki to‘satdan alomatlarda shoshilinch tibbiy yordam oling.",
+    aiMedicine: "Shifokor ko‘rsatmasi va dori yo‘riqnomasiga amal qiling. Shifokor yoki farmatsevt bilan maslahatlashmasdan dozani o‘zgartirmang, dorini to‘xtatmang yoki o‘tkazib yuborilgan dozani ikki baravar qabul qilmang.",
+    aiStroke: "Yuzning to‘satdan qiyshayishi, qo‘l yoki oyoq kuchsizligi, nutq yoki muvozanat buzilishi shoshilinch holat bo‘lishi mumkin. Darhol mahalliy tez yordamga murojaat qiling; internetdagi javobni kutmang.",
+    aiDementia: "Xotirjam va qisqa gapiring, tanish tartibni saqlang va insonning tanlovini hurmat qiling. Xotira xatolari uchun bahslashmang. Xulq keskin o‘zgarsa, mutaxassisga murojaat qiling.",
+    aiBed: "Shaxsiy parvarish rejasiga amal qiling. Terini tekshiring, toza va quruq saqlang, holatni o‘zgartirish va xavfsiz ko‘chirish bo‘yicha tavsiyalarga rioya qiling. Teri shikastlanishi, isitma, yangi og‘riq yoki holatning keskin yomonlashishini tibbiyot xodimiga bildiring.",
+    aiWater: "Agar parvarish rejasi ruxsat bersa, muntazam ichimlik taklif qiling. Ayrim kasalliklarda suyuqlik cheklanadi, shuning uchun shifokor tavsiyasisiz me’yor belgilamang. Ichilgan miqdorni yozib boring.",
+    aiGeneric: "Xavfsiz parvarish uchun shaxsiy reja va tibbiyot mutaxassisi tavsiyalariga amal qiling. Men umumiy ma’lumot bera olaman, ammo demo jonli AI xizmatiga ulanmagan.",
+    careArticles: [
+      ["Demensiyasi bor inson bilan muloqot", "Xotirjam, qisqa gapiring, tanish tartibni saqlang va tanlovni hurmat qiling. Xotira xatolari uchun bahslashmang; xulq keskin o‘zgarsa, yordam so‘rang."],
+      ["Yotoqdagi bemorni parvarishlash", "Parvarish rejasiga amal qiling, terini tekshiring, qulaylikni ta’minlang va zarur bo‘lsa xavfsiz ko‘chirishda yordam oling."],
+      ["Insultdan keyingi tiklanish", "Belgilangan reabilitatsiya rejasiga amal qiling. Nutq buzilishi, yuz qiyshayishi yoki kuchsizlik to‘satdan yuz bersa, tez yordam chaqiring."]
+    ],
+    privacyItems: [
+      ["Shifrlash", "Ishchi tizimlarda uzatishda TLS, saqlashda shifrlash va kalitlarni xavfsiz boshqarish kerak."],
+      ["Kirish nazorati", "Autentifikatsiya, rollar bo‘yicha ruxsatlar, minimal huquqlar va audit jurnallaridan foydalaning."],
+      ["Ongli rozilik", "Ma’lumotlar yig‘ilishi, maqsadi, saqlanish muddati va rozilikni qaytarish yoki o‘chirish yo‘lini tushuntiring."],
+      ["GDPR va HIPAA", "GDPR tegishli YI sharoitlarida qo‘llanishi mumkin. HIPAA AQShdagi ayrim tibbiyot tashkilotlari va hamkorlariga tegishli."]
+    ],
+    launchItems: [
+      "Himoyalangan server va shifrlangan zaxira nusxalari",
+      "Autentifikatsiya va rollar bo‘yicha kirish",
+      "Rozilik, eksport, tuzatish va o‘chirish jarayonlari",
+      "Xavfsizlik sinovlari va saqlash siyosati",
+      "Amaldagi talablar bo‘yicha yuridik tekshiruv"
+    ]
+  }
+};
+
+const caregivers = [
+  { id: 1, name: "Malika Karimova", initials: "MK", color: "#dce9dc", category: "dementia", experience: 7, price: 180000, rating: 4.9, reviews: 28, specialty: { en: "Elder care · memory support", ru: "Уход за пожилыми · поддержка памяти", uz: "Keksalar parvarishi · xotira yordami" }, bio: { en: "Daily living assistance, calm companionship, and support for people with memory difficulties.", ru: "Помощь в повседневных делах, спокойное общение и поддержка людей с нарушениями памяти.", uz: "Kundalik ishlarda yordam, xotira qiyinchiliklarida ko‘mak va xotirjam muloqot." } },
+  { id: 2, name: "Aziz Rahmonov", initials: "AR", color: "#dce9f0", category: "stroke", experience: 5, price: 220000, rating: 4.8, reviews: 19, specialty: { en: "Post-stroke care support", ru: "Уход после инсульта", uz: "Insultdan keyingi parvarish" }, bio: { en: "Daily support after stroke, following the rehabilitation plan prescribed by the treating team.", ru: "Повседневная помощь после инсульта с соблюдением плана реабилитации лечащей команды.", uz: "Insultdan keyin kundalik yordam va davolovchi jamoa belgilagan reabilitatsiya rejasiga amal qilish." } },
+  { id: 3, name: "Dilnoza Saidova", initials: "DS", color: "#f2e4d7", category: "rehab", experience: 6, price: 200000, rating: 5.0, reviews: 34, specialty: { en: "Recovery & daily care", ru: "Восстановление и ежедневный уход", uz: "Tiklanish va kundalik parvarish" }, bio: { en: "Daily care, wellbeing observations, and practical support for families.", ru: "Ежедневный уход, наблюдение за самочувствием и практическая поддержка семьи.", uz: "Kundalik parvarish, holatni kuzatish va oilaga amaliy yordam." } },
+  { id: 4, name: "Madina Yusupova", initials: "MY", color: "#e8e1f2", category: "dementia", experience: 4, price: 160000, rating: 4.7, reviews: 16, specialty: { en: "Companionship & daily routines", ru: "Общение и повседневный распорядок", uz: "Muloqot va kundalik tartib" }, bio: { en: "Companionship, meal-time support, and help maintaining familiar routines.", ru: "Общение, помощь во время приёма пищи и поддержка привычного распорядка.", uz: "Muloqot, ovqatlanishda yordam va kundalik tartibni saqlash." } },
+  { id: 5, name: "Jasur Tursunov", initials: "JT", color: "#f2e7d4", category: "rehab", experience: 8, price: 240000, rating: 4.9, reviews: 31, specialty: { en: "Mobility & recovery support", ru: "Подвижность и поддержка восстановления", uz: "Harakat va tiklanishni qo‘llab-quvvatlash" }, bio: { en: "Assistance with daily mobility following the individual's professional care plan.", ru: "Помощь с повседневной подвижностью в соответствии с индивидуальным планом ухода.", uz: "Shaxsiy parvarish rejasiga muvofiq kundalik harakatda yordam." } }
+];
+
+let lang = "en", category = "all", query = "", bookingPerson = null, chatHistory = [], toastTimer;
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)], t = k => translations[lang][k] ?? translations.en[k] ?? k;
+
+function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])) }
+function fmt(n) { return Number(n).toLocaleString(lang === "ru" ? "ru-RU" : lang === "uz" ? "uz-UZ" : "en-US") }
+
+function notify(msg) {
+  const el = $("#toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("show"), 3000);
+}
+
+function goto(page) {
+  $$(".page").forEach(x => x.classList.toggle("active", x.id === page));
+  $$(".nav button").forEach(x => x.classList.toggle("active", x.dataset.page === page));
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function personCard(p) {
+  return `
+  <article class="card bg-white border border-[#e1e8e0] rounded-2xl p-5 hover-card flex flex-col justify-between">
+    <div>
+      <div class="flex gap-3 items-start mb-3">
+        <div class="avatar w-12 h-12 rounded-xl flex items-center justify-center font-bold text-base text-[#183f34] flex-shrink-0" style="background:${p.color}">${p.initials}</div>
+        <div>
+          <h3 class="text-base font-bold text-[#183f34] leading-snug">${p.name}</h3>
+          <p class="text-xs text-[#6b7b71] mt-0.5">${esc(p.specialty[lang])}</p>
+          <div class="rating text-xs text-[#a77a24] font-semibold mt-1">★ ${p.rating.toFixed(1)} <span class="text-[#6b7b71] font-normal">(${p.reviews} ${t("reviews")})</span></div>
+        </div>
+      </div>
+      <p class="text-xs text-[#526459] mb-4 leading-relaxed">${esc(p.bio[lang])}</p>
+    </div>
+    <div class="flex items-center justify-between border-t border-[#e1e8e0] pt-3 mt-2">
+      <div>
+        <div class="price text-base font-extrabold text-[#245c4b]">${fmt(p.price)} UZS</div>
+        <div class="text-[11px] text-[#6b7b71]">${p.experience} ${t("years")} ${t("experience").toLowerCase()} · ${t("perDay")}</div>
+      </div>
+      <button class="btn text-xs font-bold text-white bg-[#245c4b] hover:bg-[#183f34] px-3.5 py-2 rounded-xl transition-all shadow-sm" data-profile="${p.id}">${t("profile")}</button>
+    </div>
+  </article>`;
+}
+
+function renderPeople() {
+  let list = caregivers.filter(p => (category === "all" || p.category === category) && (p.name + " " + p.specialty[lang] + " " + p.bio[lang]).toLowerCase().includes(query.toLowerCase()));
+  $("#people").innerHTML = list.length ? list.map(personCard).join("") : `<div class="col-span-full card bg-white border border-[#e1e8e0] rounded-2xl p-8 text-center text-[#6b7b71]">${lang === "ru" ? "Ничего не найдено. Измените поиск или категорию." : lang === "uz" ? "Hech narsa topilmadi. Qidiruv yoki toifani o‘zgartiring." : "No caregivers found. Try another search or category."}</div>`;
+  $("#homePeople").innerHTML = caregivers.slice(0, 3).map(personCard).join("");
+}
+
+function articleData() {
+  return t("careArticles").map((a, i) => ({ id: i, title: a[0], body: a[1], icon: ["♧", "♡", "＋"][i] }));
+}
+
+function articleCard(a) {
+  return `
+  <article class="card bg-white border border-[#e1e8e0] rounded-2xl p-5 hover-card flex flex-col justify-between">
+    <div class="flex gap-4 items-start mb-4">
+      <div class="symbol w-11 h-11 flex-shrink-0 flex items-center justify-center bg-[#e7f0e8] text-[#245c4b] rounded-xl text-xl font-bold">${a.icon}</div>
+      <div>
+        <h3 class="font-bold text-base text-[#183f34] mb-1 leading-snug">${esc(a.title)}</h3>
+        <p class="text-xs text-[#6b7b71] leading-relaxed">${esc(a.body)}</p>
+      </div>
+    </div>
+    <div class="flex justify-end pt-2 border-t border-[#e1e8e0]">
+      <button class="btn border border-[#cfdcd0] bg-white text-[#245c4b] hover:bg-[#e7f0e8] text-xs font-bold px-3.5 py-1.5 rounded-xl transition-all" data-article="${a.id}">${t("readArticle")} →</button>
+    </div>
+  </article>`;
+}
+
+function renderArticles() {
+  let a = articleData();
+  $("#articles").innerHTML = a.map(articleCard).join("");
+  $("#homeArticles").innerHTML = a.slice(0, 2).map(articleCard).join("");
+}
+
+function renderPrivacy() {
+  let items = t("privacyItems");
+  $("#privacyCards").innerHTML = items.map((x, i) => `
+    <article class="card bg-white border border-[#e1e8e0] rounded-2xl p-6 hover-card">
+      <div class="privacy-icon w-10 h-10 rounded-xl bg-[#e7f0e8] text-[#245c4b] flex items-center justify-center text-lg font-bold mb-3">${["▣", "♙", "✓", "§"][i]}</div>
+      <h3 class="font-bold text-base text-[#183f34] mb-2">${esc(x[0])}</h3>
+      <p class="text-xs text-[#6b7b71] leading-relaxed">${esc(x[1])}</p>
+    </article>`).join("");
+  $("#launchList").innerHTML = t("launchItems").map(x => `<li class="leading-relaxed">${esc(x)}</li>`).join("");
+}
+
+function applyLanguage() {
+  document.documentElement.lang = lang;
+  $$("[data-i]").forEach(el => {
+    let k = el.dataset.i;
+    if (t(k) !== k) el.textContent = t(k);
+  });
+  $$("[data-ph]").forEach(el => el.placeholder = t(el.dataset.ph));
+  $("#lang").value = lang;
+  renderPeople();
+  renderArticles();
+  renderPrivacy();
+  renderJournal();
+  if (chatHistory.length) renderChat();
+}
+
+function chooseCategory(cat) {
+  category = cat;
+  $("#filters").querySelectorAll("button").forEach(b => b.classList.toggle("active", b.dataset.cat === cat));
+  goto("find");
+  renderPeople();
+}
+
+function openProfile(id) {
+  const p = caregivers.find(x => x.id === Number(id));
+  if (!p) return;
+  bookingPerson = p;
+  $("#modalTitle").textContent = p.name;
+  $("#modalContent").innerHTML = `
+    <div class="flex items-center gap-4 my-4 p-3 bg-[#f8faf7] rounded-2xl border border-[#e1e8e0]">
+      <div class="avatar w-14 h-14 rounded-2xl flex items-center justify-center font-extrabold text-lg text-[#183f34]" style="background:${p.color}">${p.initials}</div>
+      <div>
+        <h3 class="font-bold text-sm text-[#183f34]">${esc(p.specialty[lang])}</h3>
+        <div class="text-xs text-[#a77a24] font-semibold">★ ${p.rating.toFixed(1)} · ${p.reviews} ${t("reviews")}</div>
+        <div class="text-xs text-[#6b7b71]">${p.experience} ${t("years")} ${t("experience").toLowerCase()}</div>
+      </div>
+    </div>
+    <h3 class="font-bold text-sm text-[#183f34] mb-1">${t("about")}</h3>
+    <p class="text-xs text-[#526459] leading-relaxed mb-4">${esc(p.bio[lang])}</p>
+    <div class="bg-[#f6f0df] text-[#75602f] p-3 rounded-xl text-xs mb-4">${t("demo")}</div>
+    <div class="flex items-center justify-between border-t border-[#e1e8e0] pt-4">
+      <p class="text-lg font-extrabold text-[#245c4b]">${fmt(p.price)} UZS <span class="text-xs font-normal text-[#6b7b71]">${t("perDay")}</span></p>
+      <button class="btn bg-[#245c4b] hover:bg-[#183f34] text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow-sm" id="startBooking">${t("book")}</button>
+    </div>`;
+  $("#modalback").classList.add("open");
+  $("#startBooking").onclick = () => openBooking(p);
+}
+
+function openBooking(p) {
+  bookingPerson = p;
+  $("#modalTitle").textContent = t("bookTitle");
+  let min = new Date().toISOString().slice(0, 10);
+  $("#modalContent").innerHTML = `
+    <p class="text-xs text-[#6b7b71] mb-4">${esc(p.name)} · ${esc(p.specialty[lang])}</p>
+    <form id="bookingForm" class="space-y-4">
+      <div>
+        <label class="block text-xs font-bold uppercase text-[#526459] mb-1">${t("chooseDate")}</label>
+        <input id="bookDate" type="date" min="${min}" required class="w-full border border-[#dce5db] rounded-xl p-2.5 text-xs outline-none focus:border-[#245c4b]">
+      </div>
+      <div>
+        <label class="block text-xs font-bold uppercase text-[#526459] mb-1">${t("chooseTime")}</label>
+        <input id="bookTime" type="time" required value="09:00" class="w-full border border-[#dce5db] rounded-xl p-2.5 text-xs outline-none focus:border-[#245c4b]">
+      </div>
+      <div>
+        <label class="block text-xs font-bold uppercase text-[#526459] mb-1">${t("visitType")}</label>
+        <select id="visit" class="w-full border border-[#dce5db] rounded-xl p-2.5 text-xs outline-none focus:border-[#245c4b]">
+          <option value="day">${t("dayVisit")}</option>
+          <option value="night">${t("nightVisit")}</option>
+        </select>
+      </div>
+      <label class="flex items-start gap-2 text-xs text-[#6b7b71] cursor-pointer">
+        <input type="checkbox" id="bookConsent" required class="mt-0.5 rounded text-[#245c4b]">
+        <span>${t("consentText")}</span>
+      </label>
+      <div class="flex gap-2 pt-2">
+        <button class="btn flex-1 bg-[#245c4b] hover:bg-[#183f34] text-white text-xs font-bold py-2.5 rounded-xl transition-all shadow-sm" type="submit">${t("confirm")}</button>
+        <button class="btn border border-[#cfdcd0] text-[#526459] hover:bg-[#e7f0e8] text-xs font-semibold px-4 py-2.5 rounded-xl transition-all" type="button" id="cancelBooking">${t("cancel")}</button>
+      </div>
+    </form>`;
+  
+  $("#bookingForm").onsubmit = e => {
+    e.preventDefault();
+    if (!$("#bookConsent").checked) { notify(t("consentRequired")); return; }
+    let req = { name: p.name, date: $("#bookDate").value, time: $("#bookTime").value, visit: $("#visit").value, created: new Date().toISOString() };
+    let a = JSON.parse(localStorage.getItem("cgBookings") || "[]");
+    a.unshift(req);
+    localStorage.setItem("cgBookings", JSON.stringify(a));
+    $("#modalback").classList.remove("open");
+    notify(t("bookingDone"));
+  };
+  $("#cancelBooking").onclick = () => openProfile(p.id);
+}
+
+function getEntries() {
+  try { return JSON.parse(localStorage.getItem("cgEntries") || "[]"); } catch { return []; }
+}
+
+function renderJournal() {
+  let entries = getEntries();
+  const types = { temperature: t("temperature"), pressure: t("pressure"), water: t("water"), medicine: t("medicine") };
+  $("#metrics").innerHTML = Object.entries(types).map(([k, v]) => `
+    <div class="card bg-white border border-[#e1e8e0] rounded-2xl p-4 shadow-sm text-center">
+      <div class="text-xs text-[#6b7b71] font-medium">${esc(v)}</div>
+      <div class="text-2xl font-extrabold text-[#183f34] my-1">${entries.filter(e => e.type === k).length}</div>
+      <div class="text-[10px] text-[#6b7b71] uppercase tracking-wider">${lang === "ru" ? "записей" : lang === "uz" ? "ta yozuv" : "entries"}</div>
+    </div>`).join("");
+
+  $("#entries").innerHTML = entries.length ? entries.slice(0, 20).map(e => `
+    <div class="py-3 flex items-start justify-between gap-3">
+      <div class="space-y-1">
+        <div class="flex items-center gap-2">
+          <b class="text-xs text-[#183f34]">${esc(types[e.type] || e.type)}</b>
+          <span class="text-xs bg-[#e7f0e8] text-[#245c4b] font-bold px-2 py-0.5 rounded-full">${esc(e.value)}</span>
+        </div>
+        <div class="text-[11px] text-[#6b7b71]">${esc(e.time)}</div>
+        ${e.note ? `<p class="text-xs text-[#526459] bg-[#f8faf7] p-2 rounded-lg border border-[#e1e8e0] mt-1">${esc(e.note)}</p>` : ""}
+      </div>
+      <button class="text-xs text-red-600 hover:text-red-800 font-medium px-2 py-1 rounded hover:bg-red-50 transition-colors" data-delete-entry="${e.id}">${lang === "ru" ? "Удалить" : lang === "uz" ? "O‘chirish" : "Delete"}</button>
+    </div>`).join("") : `<div class="p-8 text-center text-xs text-[#6b7b71]">${t("emptyEntries")}</div>`;
+}
+
+function aiAnswer(q) {
+  let s = q.toLowerCase();
+  if (/stroke|инсульт|insult|speech|речь|nutq/.test(s)) return t("aiStroke");
+  if (/pressure|давлен|bosim/.test(s)) return t("aiPressure");
+  if (/medicine|medication|лекар|таблет|dori/.test(s)) return t("aiMedicine");
+  if (/dementia|деменц|demens/.test(s)) return t("aiDementia");
+  if (/bed|bedbound|пролеж|лежач|yotoq/.test(s)) return t("aiBed");
+  if (/water|hydration|вода|пить|suv|suyuqlik/.test(s)) return t("aiWater");
+  return t("aiGeneric");
+}
+
+function renderChat() {
+  let el = $("#chat");
+  el.innerHTML = `<div class="bubble bg-white border border-[#e1e8e0] shadow-sm"><b class="block text-xs text-[#6b7b71] mb-1">Care AI</b><span>${t("welcome")}</span></div>` + chatHistory.map(m => `
+    <div class="bubble ${m.role === "user" ? "bg-[#e5eee5] border-[#d6e5d8] self-end ml-auto" : "bg-white border-[#e1e8e0] self-start"} border shadow-sm">
+      <b class="block text-xs text-[#6b7b71] mb-1">${m.role === "user" ? "You" : "Care AI"}</b>
+      <span class="text-xs text-[#24372e] leading-relaxed">${esc(m.text)}</span>
+    </div>`).join("");
+  el.scrollTop = el.scrollHeight;
+}
+
+// Global Click Handlers
+document.addEventListener("click", e => {
+  let b = e.target.closest("[data-page]");
+  if (b) goto(b.dataset.page);
+
+  let g = e.target.closest("[data-go]");
+  if (g) goto(g.dataset.go);
+
+  let c = e.target.closest("[data-cat]");
+  if (c) chooseCategory(c.dataset.cat);
+
+  let p = e.target.closest("[data-profile]");
+  if (p) openProfile(p.dataset.profile);
+
+  let a = e.target.closest("[data-article]");
+  if (a) {
+    let art = articleData().find(x => x.id === Number(a.dataset.article));
+    if (art) {
+      $("#modalTitle").textContent = art.title;
+      $("#modalContent").innerHTML = `
+        <p class="text-sm text-[#24372e] leading-relaxed mb-4">${esc(art.body)}</p>
+        <div class="bg-[#f6f0df] text-[#75602f] p-3 rounded-xl text-xs mb-4">${t("aiDisclaimer")}</div>
+        <button class="btn border border-[#cfdcd0] text-[#526459] hover:bg-[#e7f0e8] text-xs font-semibold px-4 py-2 rounded-xl transition-all" id="articleClose">${t("close")}</button>`;
+      $("#modalback").classList.add("open");
+      $("#articleClose").onclick = () => $("#modalback").classList.remove("open");
+    }
+  }
+
+  let d = e.target.closest("[data-delete-entry]");
+  if (d) {
+    localStorage.setItem("cgEntries", JSON.stringify(getEntries().filter(x => String(x.id) !== d.dataset.deleteEntry)));
+    renderJournal();
+    notify(t("deleted"));
+  }
+});
+
+// Event Listeners
+$("#search").addEventListener("input", e => { query = e.target.value; renderPeople(); });
+$("#lang").addEventListener("change", e => { lang = e.target.value; applyLanguage(); });
+$("#modalClose").onclick = () => $("#modalback").classList.remove("open");
+$("#modalback").addEventListener("click", e => { if (e.target.id === "modalback") $("#modalback").classList.remove("open"); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") $("#modalback").classList.remove("open"); });
+
+$("#entryForm").addEventListener("submit", e => {
+  e.preventDefault();
+  let entries = getEntries();
+  entries.unshift({
+    id: Date.now(),
+    type: $("#entryType").value,
+    value: $("#entryValue").value.trim(),
+    note: $("#entryNote").value.trim(),
+    time: new Date().toLocaleString(lang === "ru" ? "ru-RU" : lang === "uz" ? "uz-UZ" : "en-US")
+  });
+  localStorage.setItem("cgEntries", JSON.stringify(entries));
+  $("#entryValue").value = "";
+  $("#entryNote").value = "";
+  renderJournal();
+  notify(t("saved"));
+});
+
+$("#clearEntries").onclick = () => {
+  if (confirm(lang === "ru" ? "Удалить все записи дневника?" : lang === "uz" ? "Barcha kundalik yozuvlari o‘chirilsinmi?" : "Delete all journal entries?")) {
+    localStorage.removeItem("cgEntries");
+    renderJournal();
+    notify(t("cleared"));
+  }
+};
+
+$("#chatForm").addEventListener("submit", e => {
+  e.preventDefault();
+  let q = $("#question").value.trim();
+  if (!q) return;
+  chatHistory.push({ role: "user", text: q }, { role: "ai", text: aiAnswer(q) });
+  $("#question").value = "";
+  renderChat();
+});
+
+$("#clearChat").onclick = () => { chatHistory = []; renderChat(); };
+
+// Initialize App
+window.addEventListener("DOMContentLoaded", () => {
+  applyLanguage();
+});
+</script>
+</body>
+</html>
